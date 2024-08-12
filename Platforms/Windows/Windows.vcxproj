@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Shipping|x64">
+      <Configuration>Shipping</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{6475d00b-ade8-4d40-bed1-aeec793c73cd}</ProjectGuid>
+    <RootNamespace>Windows</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>ClangCL</PlatformToolset>
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>ClangCL</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>ClangCL</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\Engine\Properties\General.props" />
+    <Import Project="..\..\Engine\Properties\Debug.props" />
+    <Import Project="Properties\Windows.props" />
+    <Import Project="Properties\WindowsDebug.props" />
+    <Import Project="..\..\Engine\Properties\EngineForwardInclude.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\Engine\Properties\General.props" />
+    <Import Project="Properties\Windows.props" />
+    <Import Project="Properties\WindowsRelease.props" />
+    <Import Project="..\..\Engine\Properties\EngineForwardInclude.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\Engine\Properties\General.props" />
+    <Import Project="Properties\Windows.props" />
+    <Import Project="Properties\WindowsShipping.props" />
+    <Import Project="..\..\Engine\Properties\EngineForwardInclude.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClangTidyChecks>
+    </ClangTidyChecks>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnabled>false</VcpkgEnabled>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib />
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">
+    <ClCompile>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="External\D3D12Helpers\d3dx12.h" />
+    <ClInclude Include="External\D3D12\d3dx12.h" />
+    <ClInclude Include="External\ImGui\imgui_impl_dx12.h" />
+    <ClInclude Include="External\ImGui\imgui_impl_win32.h" />
+    <ClInclude Include="Headers\DX12GlobalVariables.h" />
+    <ClInclude Include="Headers\Helpers\BottomLevelASGenerator.h" />
+    <ClInclude Include="Headers\Helpers\CommandQueue.h" />
+    <ClInclude Include="Headers\Helpers\RootSignatureGenerator.h" />
+    <ClInclude Include="Headers\Helpers\TopLevelASGenerator.h" />
+    <ClInclude Include="Headers\Rendering\BackEndRenderer.h" />
+    <ClInclude Include="Headers\Helpers\TempAssert.h" />
+    <ClInclude Include="Headers\Helpers\DXHelperFunctions.h" />
+    <ClInclude Include="Headers\TypeDefs.h" />
+    <ClInclude Include="HelperFiles\d3dx12.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\AudioSystem.cpp" />
+    <ClCompile Include="Source\BEAR\BLAS.cpp" />
+    <ClCompile Include="Source\BEAR\Buffer.cpp" />
+    <ClCompile Include="Source\BEAR\CommandList.cpp" />
+    <ClCompile Include="Source\BEAR\ComputePipelineDescription.cpp" />
+    <ClCompile Include="Source\BEAR\ResourceDescriptorHeap.cpp" />
+    <ClCompile Include="Source\BEAR\Sampler.cpp" />
+    <ClCompile Include="Source\BEAR\SamplerDescriptorHeap.cpp" />
+    <ClCompile Include="Source\BEAR\ShaderLayout.cpp" />
+    <ClCompile Include="Source\BEAR\Texture.cpp" />
+    <ClCompile Include="Source\BEAR\TLAS.cpp" />
+    <ClCompile Include="Source\DX12GlobalVariables.cpp" />
+    <ClCompile Include="Source\FileIO.cpp" />
+    <ClCompile Include="External\ImGui\imgui_impl_dx12.cpp" />
+    <ClCompile Include="External\ImGui\imgui_impl_win32.cpp" />
+    <ClCompile Include="Source\BackEndRenderer.cpp" />
+    <ClCompile Include="Source\Helpers\BottomLevelASGenerator.cpp" />
+    <ClCompile Include="Source\Helpers\CommandQueue.cpp" />
+    <ClCompile Include="Source\Helpers\DXHelperFunctions.cpp" />
+    <ClCompile Include="Source\Helpers\RootSignatureGenerator.cpp" />
+    <ClCompile Include="Source\Helpers\TopLevelASGenerator.cpp" />
+    <ClCompile Include="Source\Input.cpp" />
+    <ClCompile Include="Source\LineDrawer.cpp" />
+    <ClCompile Include="Source\LoggerSystem.cpp" />
+    <ClCompile Include="Source\Utilities\RenderUtilities.cpp" />
+    <ClCompile Include="Source\Utilities\LaunchParameterscpp.cpp" />
+    <ClCompile Include="Source\Utilities\StringUtilities.cpp" />
+    <ClCompile Include="Source\Window.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\CreateMipLevel.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Shaders\LinePS.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Shaders\LineVS.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

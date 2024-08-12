@@ -1,0 +1,72 @@
+name: 'Publish Build'
+
+on:
+  push:
+    branches:
+      - Release
+
+jobs:
+  Build_And_Test:
+    timeout-minutes: 20
+    strategy:
+      fail-fast: true
+      matrix:
+        Platform: ["x64"]
+        Configuration: ["Shipping"]
+    runs-on: ${{ matrix.Platform == 'Prospero' && 'self-hosted' || 'windows-latest' }}
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+
+      - name: Checkout LFS objects
+        run: git lfs checkout
+      
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+        with:
+          msbuild-architecture: x64
+
+      - name: Build app
+        run: msbuild BallEngine.sln -t:rebuild /p:Configuration=${{ matrix.Configuration }} /p:Platform=${{ matrix.Platform }}
+
+      - name: Run and test
+        shell: cmd
+        run: |
+          cd Build\${{ matrix.Platform }}\${{ matrix.Configuration }}_Ball
+          Ball.exe -Headless -RunTests
+
+      - name: Setup steam CMD
+        id: steamcmd_setup
+        uses: CyberAndrii/setup-steamcmd@v1
+
+      - name: Write Steam Config
+        shell: pwsh
+        run: |
+          $data = [System.Convert]::FromBase64String("${{ secrets.STEAM_CONFIG_VDF }}");
+          $directory = "${{ steps.steamcmd_setup.outputs.directory }}\config\config.vdf";
+          [System.IO.File]::WriteAllBytes($directory, $data)
+          echo "Created login file !"
+
+      - name: SteamUpload
+        shell: cmd
+        run: |
+          steamcmd +login ${{ secrets.STEAM_USERNAME }} +run_app_build -desc "[SHIPPING]${{ github.event.pull_request.merge_commit_message }}" "${{ github.workspace }}\Platforms\Steam\app_shipping_2707350.vdf" +quit
+
+          echo "Done uploading exit..."
+
+  post_build:
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs: Build_And_Test
+    steps:
+      - name: post build Update
+        run: |
+          if ${{github.event_name == 'pull_request'}}; then
+            exit 0
+          fi
+          if ${{ needs.Build_And_Test.result != 'success' }}; then
+            echo "One or more build jobs failed"
+            exit 1 # This will cause the current step to fail
+          fi

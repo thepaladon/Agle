@@ -1,0 +1,31 @@
+#!/bin/sh
+
+VS_PATH=`"C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe" -latest -property installationPath`
+CLANG_FORMAT="${VS_PATH}\\VC\\Tools\\Llvm\\bin\\clang-format.exe"
+
+STYLE=$(git config --get hooks.clangformat.style)
+
+if [ -n "${STYLE}" ] ; then
+  STYLEARG="-style=${STYLE}"
+else
+  STYLEARG=""
+fi
+
+format_file() {
+  file="${1}"
+  if [ -f $file ]; then
+    echo "Formatting: " $file
+    "${CLANG_FORMAT}" -i ${STYLEARG} $file
+  
+    git add $file
+  else
+    echo "Failed to find file: " $file
+  fi
+}
+
+echo "Runs clang-format on source files...."
+
+for FILE in $(git diff --cached --name-only HEAD | grep -iE '\.(cpp|cc|h|hpp)$' )
+do
+    format_file "${FILE}"
+done

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <PostBuildEvent />
+    <PostBuildEvent>
+      <Command>xcopy "$(SolutionDir)Platforms\Windows\External\DLL\*" "$(OutDir)" /Y /E /C /I
+xcopy "$(SolutionDir)Platforms\$(PlatformDisplayName)\External\Ultralight\Lib\$(DLL_FOLDER)\*" "$(OutDir)" /Y
+(IF NOT EXIST "$(OutDir)Shaders" mklink /J  /D "$(OutDir)Shaders" "$(SolutionDir)Engine\Shaders")
+(IF NOT EXIST "$(OutDir)ShadersWin" mklink /J  /D "$(OutDir)ShadersWin" "$(SolutionDir)Platforms\Windows\Shaders")
+(IF NOT EXIST "$(OutDir)Resources" mklink /J  /D "$(OutDir)Resources" "$(SolutionDir)Ball\Resources")
+xcopy "$(SolutionDir)Engine\Shaders\ShaderHeaders" "$(OutDir)\Shaders\ShaderHeaders" /Y /E /C /I
+%(Command)</Command>
+    </PostBuildEvent>
+    <Link />
+    <Link>
+      <AdditionalDependencies>Engine.lib;Windows.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)..\$(Configuration)_Windows;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>

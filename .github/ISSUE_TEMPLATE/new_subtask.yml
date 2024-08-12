@@ -1,0 +1,43 @@
+name: "💡 New subtask"
+description: Create a new ticket for a new subtask.
+title: "<title>"
+labels: ["User Story"]
+projects: ["BredaUniversityGames/25"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: "Description"
+      description: Clearly describe what the goal is of this subtask. 
+    validations:
+      required: true
+
+  - type: textarea
+    id: dod
+    attributes:
+      label: "Definition of done"
+      description: Clearly describe what is required for this task to be considered "done". 
+      placeholder: |
+        DoD: (example)
+        1. I need to implement X...
+        2. I need to balance Y...
+        3. I need to test Z...
+        etc...
+    validations:
+      required: true
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: "Risks and Dependencies"
+      description: Describe what risks might pop up while working on this subtask. Also describe what tasks depend on this subtask. 
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: ⚠ Make sure to link the task to a milestone before submitting ⚠
+  - type: markdown
+    attributes:
+      value: ⚠ Make sure assign labels to this subtask before submitting ⚠
+      

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <PlatformDisplayName>Windows</PlatformDisplayName>
+    <FMOD_LIB>fmod.dll</FMOD_LIB>
+    <FMODS_LIB>fmodstudio.dll</FMODS_LIB>
+  </PropertyGroup>
+  <PropertyGroup>
+    <MultiProcFXC>true</MultiProcFXC>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);PLATFORM_WINDOWS;NOGDI;USE_THREADED_MODEL_LOADING</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Platforms\Windows\External;$(SolutionDir)Platforms\Windows\HelperFiles;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Lib />
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)Platforms\Windows\External\UltraLight\Lib\$(Configuration);$(SolutionDir)Platforms\Windows\External\FMOD;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>XInput.lib;dxcompiler.lib;d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <FxCompile>
+      <ShaderModel>5.1</ShaderModel>
+    </FxCompile>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PreBuildEvent />
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>
+      </Outputs>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="PlatformDisplayName">
+      <Value>$(PlatformDisplayName)</Value>
+    </BuildMacro>
+    <BuildMacro Include="FMOD_LIB">
+      <Value>$(FMOD_LIB)</Value>
+    </BuildMacro>
+    <BuildMacro Include="FMODS_LIB">
+      <Value>$(FMODS_LIB)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

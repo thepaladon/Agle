@@ -1,0 +1,2 @@
+- Inside of the script you can modify input, output and size of output
+- Make sure to create your folder and that the filepath is valid
