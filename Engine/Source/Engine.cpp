@@ -95,21 +95,25 @@ bool Ball::Engine::Initialize(const ApplicationConfig& config)
 	m_Audio = new AudioSystem();
 	m_Audio->Init();
 
-	// Check if game exists
-	if (config.m_Game == nullptr)
+	if (LaunchParameters::Contains("RunTests"))
 	{
-		// no game linked so end application
-		// There should be an engine call for throw or assert here instead
-		m_Window->Shutdown();
-	}
-	else
-	{
-		// Initialize Game
-		m_Game = config.m_Game;
-		m_Game->Initialize();
+		int returnValue = UnitTesting::RunAllTests();
+		// The combo of headless and running tests, we assume it's the server validating functionality..
+		// And it's time to go home
+		if (LaunchParameters::Contains("Headless"))
+		{
+			Shutdown();
+			return returnValue;
+		}
 	}
 
+	// Initialize Game
+	ASSERT_MSG(LOG_GENERIC, config.m_Game, "Game is expected to be valid");
+	m_Game = config.m_Game;
+	m_Game->Initialize();
+
 	END_TIMER_MSG(engine_init, "Initialized Engine with Window %i x %i", m_Window->GetWidth(), m_Window->GetHeight());
+
 	return true;
 }
 
@@ -171,18 +175,6 @@ int Engine::Run(const ApplicationConfig& config)
 
 	if (!Initialize(config))
 		return -1;
-
-	if (LaunchParameters::Contains("RunTests"))
-	{
-		int returnValue = UnitTesting::RunAllTests();
-		// The combo of headless and running tests, we assume it's the server validating functionality..
-		// And it's time to go home
-		if (LaunchParameters::Contains("Headless"))
-		{
-			Shutdown();
-			return returnValue;
-		}
-	}
 
 	// Basic Frame Tracking
 	auto lastTime = std::chrono::high_resolution_clock::now();
