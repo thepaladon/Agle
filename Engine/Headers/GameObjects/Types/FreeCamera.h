@@ -15,8 +15,8 @@ namespace Ball
 
 		void Update(float deltaTime) override;
 
-		float m_ViewScalar = 2.0f;
-		float m_MoveScalar = 80.0f;
+		float m_ViewScalar = 0.8f;
+		float m_MoveScalar = 2.0f;
 
 	private:
 		inline static bool m_InputInitialized = false;

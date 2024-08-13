@@ -19,7 +19,7 @@ int main()
 
 	config.m_Width = Ball::LaunchParameters::GetInt("WindowWidth", 1000);
 	config.m_Height = Ball::LaunchParameters::GetInt("WindowHeight", 600);
-	config.m_Title = "OffTheBubble";
+	config.m_Title = "Agle";
 
 	return Ball::GetEngine().Run(config);
 }
