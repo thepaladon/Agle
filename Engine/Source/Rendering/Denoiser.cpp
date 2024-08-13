@@ -6,6 +6,7 @@
 #include "Shaders/ShaderHeaders/CameraGPU.h"
 #include <imgui.h>
 
+#include "Rendering/BufferManager.h"
 #include "Utilities/RenderUtilities.h"
 
 using namespace Ball;
@@ -124,9 +125,10 @@ void Denoiser::Initialize(int windowWidth, int windowHeight)
 		}
 
 		if (screensize)
-			m_Buffers[i] = new Buffer(nullptr, stride, count, (flags | BufferFlags::SCREENSIZE), name.c_str());
+			m_Buffers[i] =
+				BufferManager::CreateBuffer(nullptr, stride, count, (flags | BufferFlags::SCREENSIZE), name.c_str());
 		else
-			m_Buffers[i] = new Buffer(nullptr, stride, count, flags, name.c_str());
+			m_Buffers[i] = BufferManager::CreateBuffer(nullptr, stride, count, flags, name.c_str());
 	}
 }
 
@@ -134,7 +136,7 @@ Denoiser::~Denoiser()
 {
 	for (Buffer* buffer : m_Buffers)
 	{
-		delete buffer;
+		BufferManager::DestroyBuffer(buffer);
 	}
 
 	delete m_CalculateWeightPipeline;

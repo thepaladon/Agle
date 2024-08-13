@@ -27,6 +27,8 @@
 #include <glm/ext/matrix_transform.hpp>
 
 #include <stb/stb_image_write.h>
+
+#include "Rendering/BufferManager.h"
 #include "ShaderHeaders/BloomStructsGPU.h"
 
 namespace Ball
@@ -165,7 +167,7 @@ namespace Ball
 
 		const auto numPrimaryRays = windowWidth * windowHeight;
 
-		m_InstanceIDs = new Buffer(
+		m_InstanceIDs = BufferManager::CreateBuffer(
 			nullptr, sizeof(uint32_t), numPrimaryRays, (defaultUAV | BufferFlags::SCREENSIZE), "Instance IDs");
 
 		m_OutlineObjectsPipeline = GenerateOutlineObjectsPipeline();
@@ -187,34 +189,35 @@ namespace Ball
 			for (int i = 0; i < std::size(m_RayBatch); i++)
 			{
 				std::string name = "Ray Batch " + std::to_string(i);
-				m_RayBatch[i] =
-					new Buffer(nullptr, sizeof(Ray), numPrimaryRays, (defaultUAV | BufferFlags::SCREENSIZE), name);
+				m_RayBatch[i] = BufferManager::CreateBuffer(
+					nullptr, sizeof(Ray), numPrimaryRays, (defaultUAV | BufferFlags::SCREENSIZE), name);
 			}
 
-			m_RayExtendBatch = new Buffer(nullptr,
-										  sizeof(ExtendResult),
-										  numPrimaryRays,
-										  (defaultUAV | BufferFlags::SCREENSIZE),
-										  "Extended Batch");
+			m_RayExtendBatch = BufferManager::CreateBuffer(nullptr,
+														   sizeof(ExtendResult),
+														   numPrimaryRays,
+														   (defaultUAV | BufferFlags::SCREENSIZE),
+														   "Extended Batch");
 
-			m_ShadowRayBatch = new Buffer(
+			m_ShadowRayBatch = BufferManager::CreateBuffer(
 				nullptr, sizeof(ShadowRay), numPrimaryRays, (defaultUAV | BufferFlags::SCREENSIZE), "Shadow Batch");
 
 			// Atomic Counters
-			m_NewRaysAtomic = new Buffer(nullptr, sizeof(uint32_t), 1, defaultUAV, "Atomic New Rays");
-			m_ShadowRaysAtomic = new Buffer(nullptr, sizeof(uint32_t), 2, defaultUAV, "Atomic Shadow Rays");
+			m_NewRaysAtomic = BufferManager::CreateBuffer(nullptr, sizeof(uint32_t), 1, defaultUAV, "Atomic New Rays");
+			m_ShadowRaysAtomic =
+				BufferManager::CreateBuffer(nullptr, sizeof(uint32_t), 2, defaultUAV, "Atomic Shadow Rays");
 
 			// Counters
-			m_RayCount = new Buffer(&numPrimaryRays, sizeof(uint32_t), 1, defaultUAV, "Ray Count");
+			m_RayCount = BufferManager::CreateBuffer(&numPrimaryRays, sizeof(uint32_t), 1, defaultUAV, "Ray Count");
 
-			m_WavefrontOutput = new Buffer(
+			m_WavefrontOutput = BufferManager::CreateBuffer(
 				nullptr, sizeof(glm::vec4), numPrimaryRays, (defaultUAV | BufferFlags::SCREENSIZE), "Wavefront Output");
 
-			m_MaterialHitData = new Buffer(nullptr,
-										   sizeof(MaterialHitData),
-										   numPrimaryRays,
-										   (defaultUAV | BufferFlags::SCREENSIZE),
-										   "Material Hit Data");
+			m_MaterialHitData = BufferManager::CreateBuffer(nullptr,
+															sizeof(MaterialHitData),
+															numPrimaryRays,
+															(defaultUAV | BufferFlags::SCREENSIZE),
+															"Material Hit Data");
 		}
 
 		// ---------- REPROJECT / DENOISE -----------------
@@ -412,13 +415,14 @@ namespace Ball
 			m_ModelManager->ProcessModelLoadingQueue(*m_ResourceHeap);
 
 			// Hacky fix to rest the GPU buffers for ReSTIR whenever we change level
-			delete m_Reservoirs;
-			delete m_PrevReservoirs;
+			BufferManager::DestroyBuffer(m_Reservoirs);
+			BufferManager::DestroyBuffer(m_PrevReservoirs);
+
 			BufferFlags defaultUAV = (BufferFlags::UAV | BufferFlags::ALLOW_UA | BufferFlags::DEFAULT_HEAP);
 			const auto numPrimaryRays = windowWidth * windowHeight;
-			m_Reservoirs = new Buffer(
+			m_Reservoirs = BufferManager::CreateBuffer(
 				nullptr, sizeof(Reservoir), numPrimaryRays, (defaultUAV | BufferFlags::SCREENSIZE), "ReSTIR Reservoir");
-			m_PrevReservoirs = new Buffer(
+			m_PrevReservoirs = BufferManager::CreateBuffer(
 				nullptr, sizeof(Reservoir), numPrimaryRays, (defaultUAV | BufferFlags::SCREENSIZE), "ReSTIR Reservoir");
 		}
 
@@ -736,8 +740,10 @@ namespace Ball
 		for (auto& m_RenderTarget : m_RenderTargets)
 			delete m_RenderTarget;
 
-		for (auto& rb : m_RayBatch)
-			delete rb;
+		BufferManager::DestroyAllBuffers();
+
+		// for (auto& rb : m_RayBatch)
+		// 	BufferManager::DestroyBuffer(rb);
 
 		for (auto& bloomTex : m_BloomIntermediateTextures)
 			delete bloomTex;
@@ -748,17 +754,17 @@ namespace Ball
 		delete m_BloomDownsamplePipeline;
 		delete m_BloomUpsamplePipeline;
 
-		delete m_GpuModelInfo;
-		delete m_RayExtendBatch;
-		delete m_ShadowRayBatch;
-		delete m_NewRaysAtomic;
-		delete m_ShadowRaysAtomic;
-		delete m_RayCount;
-		delete m_WavefrontOutput;
-		delete m_Reservoirs;
-		delete m_PrevReservoirs;
-		delete m_MaterialHitData;
-		delete m_InstanceIDs;
+		// delete m_GpuModelInfo;
+		// delete m_RayExtendBatch;
+		// delete m_ShadowRayBatch;
+		// delete m_NewRaysAtomic;
+		// delete m_ShadowRaysAtomic;
+		// delete m_RayCount;
+		// delete m_WavefrontOutput;
+		// delete m_Reservoirs;
+		// delete m_PrevReservoirs;
+		// delete m_MaterialHitData;
+		// delete m_InstanceIDs;
 		delete m_GenerateRaysPipeline;
 		delete m_ExtendRaysPipeline;
 		delete m_ShadeRaysPipeline;
@@ -841,6 +847,7 @@ namespace Ball
 		auto it = std::find_if(m_ScreensizeBuffers.begin(),
 							   m_ScreensizeBuffers.end(),
 							   [buffer](const ScreensizeBufferPtr& sBuffer) { return sBuffer.m_Buffer == buffer; });
+
 		if (it != m_ScreensizeBuffers.end())
 		{
 			m_ScreensizeBuffers.erase(it);
