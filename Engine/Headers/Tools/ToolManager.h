@@ -10,6 +10,7 @@ namespace Ball
 		MENU,
 		ENGINE,
 		GRAPHICS,
+		RESOURCES,
 		MODIO,
 		PHYSICS,
 		AUDIO,
@@ -44,6 +45,7 @@ namespace Ball
 		}
 
 		void OpenTool(const std::string& name) const;
+		void CreateToolMenu(const char* menuName, ToolCatagory category) const;
 
 		// Tools
 		std::vector<ToolBase*> m_Tools;

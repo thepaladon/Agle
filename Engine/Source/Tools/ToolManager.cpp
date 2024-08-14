@@ -21,6 +21,8 @@
 
 #include <sstream>
 
+#include "Tools/BufferVisualizer.h"
+
 using namespace Ball;
 
 #define REGISTER_TOOL(TYPE) RegisterTool<TYPE>(#TYPE)
@@ -43,6 +45,7 @@ void ToolManager::Init()
 	REGISTER_TOOL(GpuMarkerVisualizer);
 	REGISTER_TOOL(AudioParameter);
 	REGISTER_TOOL(InputViewTool);
+	REGISTER_TOOL(BufferVisualizer);
 
 	std::string source = Ball::LaunchParameters::GetString("OpenTools", "");
 	if (!source.empty())
@@ -66,6 +69,36 @@ void Ball::ToolManager::Shutdown()
 	}
 #endif // !NO_IMGUI
 }
+
+void ToolManager::CreateToolMenu(const char* menuName, ToolCatagory category) const
+{
+	if (ImGui::BeginMenu(menuName))
+	{
+		for (size_t i = 0; i < m_Tools.size(); i++)
+		{
+			ToolBase* tool = m_Tools[i];
+			if (tool->GetToolCatagory() == category)
+			{
+				if (ImGui::MenuItem(tool->GetName().c_str()))
+				{
+					if (tool->GetInterfaceType() == ToolInterfaceType::WINDOW)
+						tool->ToggleOpen();
+					else
+						tool->Event();
+				}
+			}
+		}
+		ImGui::EndMenu();
+	}
+}
+
+// Use an array of menu names and categories to loop through and create each menu
+std::vector<std::pair<const char*, ToolCatagory>> m_MenuItems = {
+	{"Engine", ToolCatagory::ENGINE},
+	{"Graphics", ToolCatagory::GRAPHICS},
+	{"Resources", ToolCatagory::RESOURCES},
+	{"Audio", ToolCatagory::AUDIO},
+};
 
 void ToolManager::OnImgui()
 {
@@ -97,164 +130,9 @@ void ToolManager::OnImgui()
 	{
 		ImGui::BeginMainMenuBar();
 
-		// Menu tools
-		if (ImGui::BeginMenu("Menu"))
+		for (const auto& menu : m_MenuItems)
 		{
-			// Add item for showing imgui demo window
-			if (ImGui::MenuItem("ImGui demo window"))
-			{
-				m_ShowDemoWindow = !m_ShowDemoWindow;
-			}
-
-			// Loop over all tools and if it has the correct catagory show as item
-			// Looping over all the tools for each catagory is not the best but I couldn't figure out how to add to an
-			// menu i've already begin and ended in imgui
-			for (size_t i = 0; i < m_Tools.size(); i++)
-			{
-				ToolBase* tool = m_Tools[i];
-				if (tool->GetToolCatagory() == ToolCatagory::MENU)
-				{
-					if (ImGui::MenuItem(tool->GetName().c_str()))
-					{
-						if (tool->GetInterfaceType() == ToolInterfaceType::WINDOW)
-							tool->ToggleOpen();
-						else
-							tool->Event();
-					}
-				}
-			}
-			ImGui::EndMenu();
-		}
-
-		// Engine tools
-		if (ImGui::BeginMenu("Engine"))
-		{
-			// Loop over all tools and if it has the correct catagory show as item
-			// Looping over all the tools for each catagory is not the best but I couldn't figure out how to add to an
-			// menu i've already begin and ended in imgui
-			for (size_t i = 0; i < m_Tools.size(); i++)
-			{
-				ToolBase* tool = m_Tools[i];
-				if (tool->GetToolCatagory() == ToolCatagory::ENGINE)
-				{
-					if (ImGui::MenuItem(tool->GetName().c_str()))
-					{
-						if (tool->GetInterfaceType() == ToolInterfaceType::WINDOW)
-							tool->ToggleOpen();
-						else
-							tool->Event();
-					}
-				}
-			}
-			ImGui::EndMenu();
-		}
-
-		// Graphic tools
-		if (ImGui::BeginMenu("Graphics"))
-		{
-			// Loop over all tools and if it has the correct catagory show as item
-			// Looping over all the tools for each catagory is not the best but I couldn't figure out how to add to an
-			// menu i've already begin and ended in imgui
-			for (size_t i = 0; i < m_Tools.size(); i++)
-			{
-				ToolBase* tool = m_Tools[i];
-				if (tool->GetToolCatagory() == ToolCatagory::GRAPHICS)
-				{
-					if (ImGui::MenuItem(tool->GetName().c_str()))
-					{
-						if (tool->GetInterfaceType() == ToolInterfaceType::WINDOW)
-							tool->ToggleOpen();
-						else
-							tool->Event();
-					}
-				}
-			}
-			ImGui::EndMenu();
-		}
-
-		// Mod.io tools
-		if (ImGui::BeginMenu("Mod.io"))
-		{
-			// Loop over all tools and if it has the correct catagory show as item
-			// Looping over all the tools for each catagory is not the best but I couldn't figure out how to add to an
-			// menu i've already begin and ended in imgui
-			for (size_t i = 0; i < m_Tools.size(); i++)
-			{
-				ToolBase* tool = m_Tools[i];
-				if (tool->GetToolCatagory() == ToolCatagory::MODIO)
-				{
-					if (ImGui::MenuItem(tool->GetName().c_str()))
-					{
-						tool->ToggleOpen();
-					}
-				}
-			}
-			ImGui::EndMenu();
-		}
-
-		if (ImGui::BeginMenu("Physics"))
-		{
-			// Loop over all tools and if it has the correct catagory show as item
-			// Looping over all the tools for each catagory is not the best but I couldn't figure out how to add to an
-			// menu i've already begin and ended in imgui
-			for (size_t i = 0; i < m_Tools.size(); i++)
-			{
-				ToolBase* tool = m_Tools[i];
-				if (tool->GetToolCatagory() == ToolCatagory::PHYSICS)
-				{
-					if (ImGui::MenuItem(tool->GetName().c_str()))
-					{
-						if (tool->GetInterfaceType() == ToolInterfaceType::WINDOW)
-							tool->ToggleOpen();
-						else
-							tool->Event();
-					}
-				}
-			}
-			ImGui::EndMenu();
-		}
-
-		// Mod.io tools
-		if (ImGui::BeginMenu("Audio"))
-		{
-			// Loop over all tools and if it has the correct catagory show as item
-			// Looping over all the tools for each catagory is not the best but I couldn't figure out how to add to an
-			// menu i've already begin and ended in imgui
-			for (size_t i = 0; i < m_Tools.size(); i++)
-			{
-				ToolBase* tool = m_Tools[i];
-				if (tool->GetToolCatagory() == ToolCatagory::AUDIO)
-				{
-					if (ImGui::MenuItem(tool->GetName().c_str()))
-					{
-						tool->ToggleOpen();
-					}
-				}
-			}
-			ImGui::EndMenu();
-		}
-
-		// Other tools
-		if (ImGui::BeginMenu("Other"))
-		{
-			// Loop over all tools and if it has the correct catagory show as item
-			// Looping over all the tools for each catagory is not the best but I couldn't figure out how to add to an
-			// menu i've already begin and ended in imgui
-			for (size_t i = 0; i < m_Tools.size(); i++)
-			{
-				ToolBase* tool = m_Tools[i];
-				if (tool->GetToolCatagory() == ToolCatagory::OTHER)
-				{
-					if (ImGui::MenuItem(tool->GetName().c_str()))
-					{
-						if (tool->GetInterfaceType() == ToolInterfaceType::WINDOW)
-							tool->ToggleOpen();
-						else
-							tool->Event();
-					}
-				}
-			}
-			ImGui::EndMenu();
+			CreateToolMenu(menu.first, menu.second);
 		}
 
 		ImGui::Separator();

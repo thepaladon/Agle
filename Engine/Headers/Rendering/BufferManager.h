@@ -5,6 +5,11 @@
 
 namespace Ball
 {
+	class BufferVisualizer;
+}
+
+namespace Ball
+{
 	class BufferManager
 	{
 	public:
@@ -21,6 +26,7 @@ namespace Ball
 		BufferManager(const BufferManager&) = delete;
 		BufferManager& operator=(const BufferManager&) = delete;
 
+		friend BufferVisualizer; // Uses this data to display info about Buffers
 		static inline std::unordered_set<Buffer*> m_Buffers;
 		static inline size_t m_BufferCount = 0;
 	};

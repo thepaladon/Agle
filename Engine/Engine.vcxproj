@@ -177,6 +177,7 @@
     <ClCompile Include="Source\GameObjects\Types\GhostObject.cpp" />
     <ClCompile Include="Source\GameObjects\ObjectFactory.cpp" />
     <ClCompile Include="Source\Rendering\BufferManager.cpp" />
+    <ClCompile Include="Source\Tools\BufferVisualizer.cpp" />
     <ClCompile Include="Source\Tools\GpuMarkerVisualizer.cpp" />
     <ClCompile Include="Source\Tools\InputViewTool.cpp" />
     <ClCompile Include="Source\GameObjects\Types\LevelEditorCamera.cpp" />
@@ -195,6 +196,7 @@
     <ClInclude Include="Headers\Tools\AudioParameters.h" />
     <ClInclude Include="Headers\Rendering\ModelLoading\ModelAnimation.h" />
     <ClInclude Include="Headers\Tools\BloomSettingsUI.h" />
+    <ClInclude Include="Headers\Tools\BufferVisualizer.h" />
     <ClInclude Include="Headers\Tools\GpuMarkerVisualizer.h" />
     <ClInclude Include="Headers\Tools\GridSettingsUI.h" />
     <ClInclude Include="Headers\Rendering\AnimationController.h" />
