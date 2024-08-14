@@ -6,18 +6,16 @@ namespace Ball
 										const std::string& name)
 	{
 		const auto buffer = new Buffer(data, stride, count, flags, name);
-		m_Buffers.insert(buffer);
+		m_Buffers.push_back(buffer);
 		m_BufferCount++;
 		return buffer;
 	}
 
 	void BufferManager::DestroyBuffer(Buffer* buffer)
 	{
-		if (m_Buffers.erase(buffer) > 0)
-		{
-			delete buffer;
-			m_BufferCount--;
-		}
+		m_Buffers.remove(buffer);
+		delete buffer;
+		m_BufferCount--;
 	}
 
 	void BufferManager::DestroyAllBuffers()

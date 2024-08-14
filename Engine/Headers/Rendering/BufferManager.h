@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
-#include <unordered_set>
+#include <set>
+
 #include "BEAR/Buffer.h"
 
 namespace Ball
@@ -27,7 +28,7 @@ namespace Ball
 		BufferManager& operator=(const BufferManager&) = delete;
 
 		friend BufferVisualizer; // Uses this data to display info about Buffers
-		static inline std::unordered_set<Buffer*> m_Buffers;
+		static inline std::list<Buffer*> m_Buffers;
 		static inline size_t m_BufferCount = 0;
 	};
 } // namespace Ball
