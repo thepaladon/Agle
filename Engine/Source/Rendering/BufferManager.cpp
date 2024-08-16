@@ -20,9 +20,11 @@ namespace Ball
 
 	void BufferManager::DestroyAll()
 	{
-		for (auto& buf : m_Buffers)
-		{
+		m_BufferCount = 0;
+
+		for (const auto& buf : m_Buffers)
 			delete buf;
-		}
+
+		m_Buffers.clear();
 	}
 } // namespace Ball

@@ -99,6 +99,7 @@ namespace Ball
 			return uint32_t(fmax(1.0, log2(fmax(float(m_Spec.m_Width), float(m_Spec.m_Height))) + 1.f));
 		}
 
+		// Note: Should be private, but because of MT Model Loading it's not - [ Angel 16/08/24 ]
 		void GenerateMips();
 
 	private:

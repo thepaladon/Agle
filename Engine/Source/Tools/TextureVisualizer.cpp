@@ -5,7 +5,6 @@
 
 using namespace Ball;
 
-bool IsFlagSetA(int flags, int flag);
 void RenderMultiSelectComboA(const char* label, int& selectedFlags, const std::vector<std::string>& items);
 
 void TextureVisualizer::Init()
@@ -30,26 +29,9 @@ void TextureVisualizer::Draw()
 		"Name (Descending)",
 	};
 
-	ImGui::Combo("Sort by", &sortOption, sortItems, IM_ARRAYSIZE(sortItems));
-
-	const std::vector<std::string> items = {
-		"NONE", "CBV", "SRV", "UAV", "ALLOW_UA", "DEFAULT_HEAP", "UPLOAD_HEAP", "VERTEX_Texture", "SCREENSIZE"};
-
-	if (ImGui::BeginCombo("Filter", "Select..."))
-	{
-		for (int i = 0; i < items.size(); ++i)
-		{
-			bool isSelected = IsFlagSetA(m_SelectedFlags, 1 << i);
-			if (ImGui::Checkbox(items[i].c_str(), &isSelected))
-			{
-				if (isSelected)
-					m_SelectedFlags |= (1 << i); // Set the flag
-				else
-					m_SelectedFlags &= ~(1 << i); // Clear the flag
-			}
-		}
-		ImGui::EndCombo();
-	}
+	ImGui::Combo("Sort by Flags", &sortOption, sortItems, IM_ARRAYSIZE(sortItems));
+	const std::vector<std::string> comboFlags = {"NONE", "MIPMAP_GENERATE", "ALLOW_UA", "SCREENSIZE"};
+	RenderMultiSelectComboA("Filter", m_SelectedFlags, comboFlags);
 
 	// Copy unordered_set to vector for sorting and filtering
 	std::vector<Texture*> nameFilteredTextures;
@@ -88,8 +70,8 @@ void TextureVisualizer::Draw()
 				  [](Texture* a, Texture* b) { return a->GetName() > b->GetName(); });
 	}
 
+	// List all Textures as selectable items
 	int index = 0;
-
 	std::unordered_set<Texture*> toDelete;
 	for (auto& Texture : flagFilteredTextures)
 	{
@@ -103,7 +85,6 @@ void TextureVisualizer::Draw()
 			if (!isSelected)
 				toDelete.insert(Texture);
 		}
-
 		index++;
 	}
 
@@ -114,11 +95,13 @@ void TextureVisualizer::Draw()
 		bool open = true;
 		ImGui::Begin(name.c_str(), &open);
 		ImGui::Text("%s", name.c_str());
-		ImGui::Text("Width: %u Bytes", selectedTexture->GetWidth());
-		ImGui::Text("Height: %u Bytes", selectedTexture->GetHeight());
-		ImGui::Text("Aligned Width: %u Bytes", selectedTexture->GetAlignedWidth());
+		ImGui::Text("Type: %s", TextureManager::GetTypeAsString(selectedTexture->GetType()).c_str());
+		ImGui::Text("Format: %s", TextureManager::GetFormatAsString(selectedTexture->GetFormat()).c_str());
+		ImGui::Text("Width: %u", selectedTexture->GetWidth());
+		ImGui::Text("Height: %u", selectedTexture->GetHeight());
+		ImGui::Text("Aligned Width: %u", selectedTexture->GetAlignedWidth());
 		ImGui::Text("Number of Channels: %u", selectedTexture->GetNumChannels());
-		ImGui::Text("Bytes per Channel: %u Bytes", selectedTexture->GetBytesPerChannel());
+		ImGui::Text("Bytes per Channel: %u", selectedTexture->GetBytesPerChannel());
 		ImGui::Text("Size: %u Bytes",
 					selectedTexture->GetAlignedWidth() * selectedTexture->GetHeight() *
 						selectedTexture->GetBytesPerChannel() * selectedTexture->GetNumChannels());

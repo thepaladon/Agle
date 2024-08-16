@@ -18,6 +18,12 @@ namespace Ball
 
 		static size_t GetCount() { return m_TextureCount; }
 
+		// Function to get TextureFormat as string
+		static std::string GetFormatAsString(const TextureFormat format);
+
+		// Function to get TextureType as string
+		static std::string GetTypeAsString(const TextureType type);
+
 	private:
 		TextureManager() = delete;
 		TextureManager(const TextureManager&) = delete;
