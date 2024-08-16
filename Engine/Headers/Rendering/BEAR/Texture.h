@@ -82,7 +82,6 @@ namespace Ball
 		TextureType GetType() const { return m_Spec.m_Type; }
 		uint32_t GetBytesPerChannel() const { return m_BytesPerChannel; }
 		uint32_t GetNumChannels() const { return m_Channels; }
-
 		uint32_t GetWidth() const { return m_Spec.m_Width; }
 		uint32_t GetHeight() const { return m_Spec.m_Height; }
 

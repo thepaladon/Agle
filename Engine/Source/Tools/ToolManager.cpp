@@ -22,6 +22,7 @@
 #include <sstream>
 
 #include "Tools/BufferVisualizer.h"
+#include "Tools/TextureVisualizer.h"
 
 using namespace Ball;
 
@@ -46,6 +47,7 @@ void ToolManager::Init()
 	REGISTER_TOOL(AudioParameter);
 	REGISTER_TOOL(InputViewTool);
 	REGISTER_TOOL(BufferVisualizer);
+	REGISTER_TOOL(TextureVisualizer);
 
 	std::string source = Ball::LaunchParameters::GetString("OpenTools", "");
 	if (!source.empty())

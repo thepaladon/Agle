@@ -201,6 +201,7 @@
     <ClInclude Include="Headers\Tools\GpuMarkerVisualizer.h" />
     <ClInclude Include="Headers\Tools\GridSettingsUI.h" />
     <ClInclude Include="Headers\Rendering\AnimationController.h" />
+    <ClInclude Include="Headers\Tools\TextureVisualizer.h" />
     <ClInclude Include="Headers\Tools\TonemapperSettings.h" />
     <ClInclude Include="Headers\UnitTesting.h" />
     <ClInclude Include="Headers\Utilities\FileWatch.h" />
@@ -293,6 +294,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\GameObjects\Types\TestObject.cpp" />
+    <ClCompile Include="Source\Tools\TextureVisualizer.cpp" />
     <ClCompile Include="Source\Tools\TonemapperSettings.cpp" />
     <ClCompile Include="Source\Rendering\Denoiser.cpp" />
     <ClCompile Include="Source\UnitTests\ObjectManagerTests.cpp" />

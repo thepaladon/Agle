@@ -5,10 +5,6 @@
 namespace Ball
 {
 	class TextureVisualizer;
-}
-
-namespace Ball
-{
 	class TextureManager
 	{
 	public:
