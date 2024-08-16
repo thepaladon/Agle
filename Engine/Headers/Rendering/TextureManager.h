@@ -1,29 +1,34 @@
 #pragma once
-#include <cstdint>
 
-#include "Shaders/ShaderHeaders/GpuModelStruct.h"
+#include "BEAR/Texture.h"
 
-namespace tinygltf
+namespace Ball
 {
-	struct Primitive;
+	class TextureVisualizer;
 }
 
 namespace Ball
 {
-	class Primitive
+	class TextureManager
 	{
 	public:
-		Primitive(const tinygltf::Primitive& primitive);
+		static Texture* Create(const void* data, TextureSpec spec, const std::string& name = "default_name");
 
-		uint32_t GetPositionIndex() const { return m_Data.m_PositionIndex; }
-		uint32_t GetIndexBufferIndex() const { return m_Data.m_IndexBufferId; }
-		uint32_t GetMaterialIndex() const { return m_Data.m_MaterialIndex; }
+		static Texture* CreateFromFilepath(const std::string& path, TextureSpec spec,
+										   const std::string& name = "default_name");
 
-		void SetMatrix(glm::mat4 mat) { m_Data.m_Model = mat; }
-		glm::mat4 GetMatrix() const { return m_Data.m_Model; }
+		static void Destroy(Texture* buffer);
+		static void DestroyAll();
+
+		static size_t GetCount() { return m_TextureCount; }
 
 	private:
-		PrimitiveGPU m_Data;
-	};
+		TextureManager() = delete;
+		TextureManager(const TextureManager&) = delete;
+		TextureManager& operator=(const TextureManager&) = delete;
 
+		friend TextureVisualizer; // Uses this data to display info about Textures
+		static inline std::list<Texture*> m_Textures;
+		static inline size_t m_TextureCount = 0;
+	};
 } // namespace Ball

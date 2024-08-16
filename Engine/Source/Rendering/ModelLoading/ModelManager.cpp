@@ -41,9 +41,9 @@ namespace Ball
 	ModelManager::~ModelManager()
 	{
 		delete m_TLAS;
-		BufferManager::DestroyBuffer(m_LightData);
-		BufferManager::DestroyBuffer(m_ModelHeapLocationBuffer);
-		BufferManager::DestroyBuffer(m_InstanceTransformsBuffer);
+		BufferManager::Destroy(m_LightData);
+		BufferManager::Destroy(m_ModelHeapLocationBuffer);
+		BufferManager::Destroy(m_InstanceTransformsBuffer);
 	}
 
 	void ModelManager::RequestReloadModels()
@@ -170,12 +170,12 @@ namespace Ball
 			}
 		}
 
-		BufferManager::DestroyBuffer(m_ModelHeapLocationBuffer);
-		m_ModelHeapLocationBuffer = BufferManager::CreateBuffer(cpuBuffer.data(),
-																sizeof(cpuBuffer[0]),
-																cpuBuffer.size(),
-																BufferFlags::SRV | BufferFlags::DEFAULT_HEAP,
-																"World Info Buffer");
+		BufferManager::Destroy(m_ModelHeapLocationBuffer);
+		m_ModelHeapLocationBuffer = BufferManager::Create(cpuBuffer.data(),
+														  sizeof(cpuBuffer[0]),
+														  cpuBuffer.size(),
+														  BufferFlags::SRV | BufferFlags::DEFAULT_HEAP,
+														  "World Info Buffer");
 
 		rdhToStoreModels.Switch(*m_ModelHeapLocationBuffer, RDH_MODEL_DATA);
 
@@ -310,12 +310,12 @@ namespace Ball
 			instanceTransforms.push_back(instance->m_Transform);
 		}
 
-		BufferManager::DestroyBuffer(m_InstanceTransformsBuffer);
-		m_InstanceTransformsBuffer = BufferManager::CreateBuffer(instanceTransforms.data(),
-																 sizeof(glm::mat4),
-																 tlasConstructionData.size(),
-																 BufferFlags::SRV | BufferFlags::UPLOAD_HEAP,
-																 "Transform Buffer");
+		BufferManager::Destroy(m_InstanceTransformsBuffer);
+		m_InstanceTransformsBuffer = BufferManager::Create(instanceTransforms.data(),
+														   sizeof(glm::mat4),
+														   tlasConstructionData.size(),
+														   BufferFlags::SRV | BufferFlags::UPLOAD_HEAP,
+														   "Transform Buffer");
 		rdhToStoreTLASBuffers.Switch(*m_InstanceTransformsBuffer, RDH_TRANSFORMS);
 
 		m_TLAS = new TLAS(tlasConstructionData);
@@ -325,7 +325,7 @@ namespace Ball
 
 	void ModelManager::FillInLights()
 	{
-		BufferManager::DestroyBuffer(m_LightData);
+		BufferManager::Destroy(m_LightData);
 
 		std::vector<GameObject*> objectsWithModels;
 		for (auto const& object : GetLevel().GetObjectManager())
@@ -356,11 +356,11 @@ namespace Ball
 
 		ASSERT_MSG(LOG_GRAPHICS, !lightDataCPU.empty(), "We do not support having no light sources in a scene!");
 
-		m_LightData = BufferManager::CreateBuffer(lightDataCPU.data(),
-												  sizeof(LightPickData),
-												  lightDataCPU.size(),
-												  (BufferFlags::SRV | BufferFlags::DEFAULT_HEAP),
-												  "Lights");
+		m_LightData = BufferManager::Create(lightDataCPU.data(),
+											sizeof(LightPickData),
+											lightDataCPU.size(),
+											(BufferFlags::SRV | BufferFlags::DEFAULT_HEAP),
+											"Lights");
 	}
 
 	std::vector<TlasInstanceData*> ModelManager::CreateTlasInstanceData()

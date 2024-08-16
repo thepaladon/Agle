@@ -2,8 +2,8 @@
 
 namespace Ball
 {
-	Buffer* BufferManager::CreateBuffer(const void* data, uint32_t stride, uint32_t count, BufferFlags flags,
-										const std::string& name)
+	Buffer* BufferManager::Create(const void* data, uint32_t stride, uint32_t count, BufferFlags flags,
+								  const std::string& name)
 	{
 		const auto buffer = new Buffer(data, stride, count, flags, name);
 		m_Buffers.push_back(buffer);
@@ -11,14 +11,14 @@ namespace Ball
 		return buffer;
 	}
 
-	void BufferManager::DestroyBuffer(Buffer* buffer)
+	void BufferManager::Destroy(Buffer* buffer)
 	{
 		m_Buffers.remove(buffer);
 		delete buffer;
 		m_BufferCount--;
 	}
 
-	void BufferManager::DestroyAllBuffers()
+	void BufferManager::DestroyAll()
 	{
 		for (auto& buf : m_Buffers)
 		{

@@ -14,13 +14,13 @@ namespace Ball
 	class BufferManager
 	{
 	public:
-		static Buffer* CreateBuffer(const void* data, uint32_t stride, uint32_t count,
-									BufferFlags flags = BufferFlags::NONE, const std::string& name = "default_name");
+		static Buffer* Create(const void* data, uint32_t stride, uint32_t count, BufferFlags flags = BufferFlags::NONE,
+							  const std::string& name = "default_name");
 
-		static void DestroyBuffer(Buffer* buffer);
-		static void DestroyAllBuffers();
+		static void Destroy(Buffer* buffer);
+		static void DestroyAll();
 
-		static size_t GetBufferCount() { return m_BufferCount; }
+		static size_t GetCount() { return m_BufferCount; }
 
 	private:
 		BufferManager() = delete;

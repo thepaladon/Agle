@@ -177,6 +177,7 @@
     <ClCompile Include="Source\GameObjects\Types\GhostObject.cpp" />
     <ClCompile Include="Source\GameObjects\ObjectFactory.cpp" />
     <ClCompile Include="Source\Rendering\BufferManager.cpp" />
+    <ClCompile Include="Source\Rendering\TextureManager.cpp" />
     <ClCompile Include="Source\Tools\BufferVisualizer.cpp" />
     <ClCompile Include="Source\Tools\GpuMarkerVisualizer.cpp" />
     <ClCompile Include="Source\Tools\InputViewTool.cpp" />

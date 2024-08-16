@@ -126,9 +126,9 @@ void Denoiser::Initialize(int windowWidth, int windowHeight)
 
 		if (screensize)
 			m_Buffers[i] =
-				BufferManager::CreateBuffer(nullptr, stride, count, (flags | BufferFlags::SCREENSIZE), name.c_str());
+				BufferManager::Create(nullptr, stride, count, (flags | BufferFlags::SCREENSIZE), name.c_str());
 		else
-			m_Buffers[i] = BufferManager::CreateBuffer(nullptr, stride, count, flags, name.c_str());
+			m_Buffers[i] = BufferManager::Create(nullptr, stride, count, flags, name.c_str());
 	}
 }
 
@@ -136,7 +136,7 @@ Denoiser::~Denoiser()
 {
 	for (Buffer* buffer : m_Buffers)
 	{
-		BufferManager::DestroyBuffer(buffer);
+		BufferManager::Destroy(buffer);
 	}
 
 	delete m_CalculateWeightPipeline;
