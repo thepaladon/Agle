@@ -26,16 +26,19 @@ namespace Ball
 		m_BufferHandle.m_State = D3D12_RESOURCE_STATE_COMMON;
 		D3D12_RESOURCE_FLAGS createFlags = D3D12_RESOURCE_FLAG_NONE;
 		D3D12_HEAP_PROPERTIES heapProps = Helpers::kUploadHeapProps;
+
 		if ((m_Flags & BufferFlags::ALLOW_UA) != BufferFlags::NONE)
 		{
 			createFlags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 		}
+
 		if ((m_Flags & BufferFlags::DEFAULT_HEAP) != BufferFlags::NONE)
 		{
 			heapProps = Helpers::kDefaultHeapProps;
 			assert((m_Flags & BufferFlags::UPLOAD_HEAP) == BufferFlags::NONE &&
 				   "Buffer can't have default and upload flags");
 		}
+
 		m_BufferHandle.m_Buffer = Helpers::CreateBuffer(bufferSize, createFlags, m_BufferHandle.m_State, heapProps);
 		m_BufferHandle.m_Buffer->SetPrivateData(WKPDID_D3DDebugObjectName, name.size(), name.c_str());
 		m_BufferHandle.m_Buffer->SetName(Helpers::ConvertToWString(name).c_str());
@@ -47,10 +50,12 @@ namespace Ball
 			{
 				if (m_BufferHandle.m_Uploader.Get() != nullptr)
 					m_BufferHandle.m_Uploader.Get()->Release();
+
 				// For default heap we need to use a staging resource as we can't write straight to it
 				CD3DX12_RANGE readRange(0, 0);
 				m_BufferHandle.m_Uploader = Helpers::CreateBuffer(
 					bufferSize, D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_GENERIC_READ, Helpers::kUploadHeapProps);
+
 				UINT8* pUploadBegin;
 				ThrowIfFailed(m_BufferHandle.m_Uploader->Map(0, &readRange, reinterpret_cast<void**>(&pUploadBegin)));
 				memcpy(pUploadBegin, data, bufferSize);
@@ -64,7 +69,7 @@ namespace Ball
 					Helpers::TransitionResourceState(this, D3D12_RESOURCE_STATE_COMMON);
 				}
 			}
-			else
+			else if ((m_Flags & BufferFlags::UPLOAD_HEAP) != BufferFlags::NONE)
 			{
 				CD3DX12_RANGE readRange(0, 0);
 				UINT8* pUploadBegin;
@@ -97,25 +102,30 @@ namespace Ball
 	void Buffer::Resize(uint32_t newCount)
 	{
 		m_BufferHandle.m_Buffer.Reset();
+
 		if (m_BufferHandle.m_Uploader.Get() != nullptr)
 			m_BufferHandle.m_Uploader.Reset();
 
 		m_Count = newCount;
 		uint32_t bufferSize = m_Stride * m_Count;
+
 		// Allocate space
 		m_BufferHandle.m_State = D3D12_RESOURCE_STATE_COMMON;
 		D3D12_RESOURCE_FLAGS createFlags = D3D12_RESOURCE_FLAG_NONE;
 		D3D12_HEAP_PROPERTIES heapProps = Helpers::kUploadHeapProps;
+
 		if ((m_Flags & BufferFlags::ALLOW_UA) != BufferFlags::NONE)
 		{
 			createFlags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 		}
+
 		if ((m_Flags & BufferFlags::DEFAULT_HEAP) != BufferFlags::NONE)
 		{
 			heapProps = Helpers::kDefaultHeapProps;
 			assert((m_Flags & BufferFlags::UPLOAD_HEAP) == BufferFlags::NONE &&
 				   "Buffer can't have default and upload flags");
 		}
+
 		m_BufferHandle.m_Buffer = Helpers::CreateBuffer(bufferSize, createFlags, m_BufferHandle.m_State, heapProps);
 		m_BufferHandle.m_Buffer->SetPrivateData(WKPDID_D3DDebugObjectName, m_Name.size(), m_Name.c_str());
 
