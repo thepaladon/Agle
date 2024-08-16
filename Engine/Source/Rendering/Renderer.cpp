@@ -27,6 +27,9 @@
 #include <glm/ext/matrix_transform.hpp>
 
 #include <stb/stb_image_write.h>
+
+#include "Rendering/BufferManager.h"
+#include "Rendering/TextureManager.h"
 #include "ShaderHeaders/BloomStructsGPU.h"
 
 namespace Ball
@@ -79,11 +82,12 @@ namespace Ball
 		renderTargetSpec.m_Flags = TextureFlags::NONE;
 
 		for (int i = 0; i < NUM_RT_BUFFERS; i++)
-			m_RenderTargets[i] = new Texture(nullptr, renderTargetSpec, "Render Target [" + std::to_string(i) + "]");
+			m_RenderTargets[i] =
+				TextureManager::Create(nullptr, renderTargetSpec, "Render Target [" + std::to_string(i) + "]");
 
 		renderTargetSpec.m_Type = TextureType::RW_TEXTURE;
 		renderTargetSpec.m_Flags = TextureFlags::ALLOW_UA | TextureFlags::SCREENSIZE;
-		m_TransferToRTTexture = new Texture(nullptr, renderTargetSpec, "Intermediate Texture");
+		m_TransferToRTTexture = TextureManager::Create(nullptr, renderTargetSpec, "Intermediate Texture");
 
 		// Initialize Command List and Render Targets (as Textures)
 		m_CmdList->Initialize(m_TransferToRTTexture);
@@ -109,7 +113,7 @@ namespace Ball
 		intermediateOutputSpec.m_Format = TextureFormat::R32_G32_B32_A32_FLOAT;
 		intermediateOutputSpec.m_Type = TextureType::RW_TEXTURE;
 		intermediateOutputSpec.m_Flags = (TextureFlags::ALLOW_UA | TextureFlags::SCREENSIZE);
-		m_OutputTexture = new Texture(nullptr, intermediateOutputSpec, "Intermediate Output Texture");
+		m_OutputTexture = TextureManager::Create(nullptr, intermediateOutputSpec, "Intermediate Output Texture");
 
 		// Add samplers to (another) Bindless Heapkloofendal_48d_partly_cloudy_puresky_4k
 		LoadBlueNoiseTextures();
@@ -156,7 +160,7 @@ namespace Ball
 			intermediateOutputSpec.m_Height = glm::max<int>(intermediateOutputSpec.m_Height >> 1, 1);
 			intermediateOutputSpec.m_Width = glm::max<int>(intermediateOutputSpec.m_Width >> 1, 1);
 
-			m_BloomIntermediateTextures[i] = new Texture(nullptr, intermediateOutputSpec, name);
+			m_BloomIntermediateTextures[i] = TextureManager::Create(nullptr, intermediateOutputSpec, name);
 		}
 
 		// BLOOM STUF END
@@ -165,7 +169,7 @@ namespace Ball
 
 		const auto numPrimaryRays = windowWidth * windowHeight;
 
-		m_InstanceIDs = new Buffer(
+		m_InstanceIDs = BufferManager::Create(
 			nullptr, sizeof(uint32_t), numPrimaryRays, (defaultUAV | BufferFlags::SCREENSIZE), "Instance IDs");
 
 		m_OutlineObjectsPipeline = GenerateOutlineObjectsPipeline();
@@ -187,34 +191,34 @@ namespace Ball
 			for (int i = 0; i < std::size(m_RayBatch); i++)
 			{
 				std::string name = "Ray Batch " + std::to_string(i);
-				m_RayBatch[i] =
-					new Buffer(nullptr, sizeof(Ray), numPrimaryRays, (defaultUAV | BufferFlags::SCREENSIZE), name);
+				m_RayBatch[i] = BufferManager::Create(
+					nullptr, sizeof(Ray), numPrimaryRays, (defaultUAV | BufferFlags::SCREENSIZE), name);
 			}
 
-			m_RayExtendBatch = new Buffer(nullptr,
-										  sizeof(ExtendResult),
-										  numPrimaryRays,
-										  (defaultUAV | BufferFlags::SCREENSIZE),
-										  "Extended Batch");
+			m_RayExtendBatch = BufferManager::Create(nullptr,
+													 sizeof(ExtendResult),
+													 numPrimaryRays,
+													 (defaultUAV | BufferFlags::SCREENSIZE),
+													 "Extended Batch");
 
-			m_ShadowRayBatch = new Buffer(
+			m_ShadowRayBatch = BufferManager::Create(
 				nullptr, sizeof(ShadowRay), numPrimaryRays, (defaultUAV | BufferFlags::SCREENSIZE), "Shadow Batch");
 
 			// Atomic Counters
-			m_NewRaysAtomic = new Buffer(nullptr, sizeof(uint32_t), 1, defaultUAV, "Atomic New Rays");
-			m_ShadowRaysAtomic = new Buffer(nullptr, sizeof(uint32_t), 2, defaultUAV, "Atomic Shadow Rays");
+			m_NewRaysAtomic = BufferManager::Create(nullptr, sizeof(uint32_t), 1, defaultUAV, "Atomic New Rays");
+			m_ShadowRaysAtomic = BufferManager::Create(nullptr, sizeof(uint32_t), 2, defaultUAV, "Atomic Shadow Rays");
 
 			// Counters
-			m_RayCount = new Buffer(&numPrimaryRays, sizeof(uint32_t), 1, defaultUAV, "Ray Count");
+			m_RayCount = BufferManager::Create(&numPrimaryRays, sizeof(uint32_t), 1, defaultUAV, "Ray Count");
 
-			m_WavefrontOutput = new Buffer(
+			m_WavefrontOutput = BufferManager::Create(
 				nullptr, sizeof(glm::vec4), numPrimaryRays, (defaultUAV | BufferFlags::SCREENSIZE), "Wavefront Output");
 
-			m_MaterialHitData = new Buffer(nullptr,
-										   sizeof(MaterialHitData),
-										   numPrimaryRays,
-										   (defaultUAV | BufferFlags::SCREENSIZE),
-										   "Material Hit Data");
+			m_MaterialHitData = BufferManager::Create(nullptr,
+													  sizeof(MaterialHitData),
+													  numPrimaryRays,
+													  (defaultUAV | BufferFlags::SCREENSIZE),
+													  "Material Hit Data");
 		}
 
 		// ---------- REPROJECT / DENOISE -----------------
@@ -296,7 +300,7 @@ namespace Ball
 				{
 					// Texture doesn't exist, add it.
 					std::string name = "Intermediate Output Texture Mip " + std::to_string(i);
-					m_BloomIntermediateTextures[i] = new Texture(nullptr, spec, name);
+					m_BloomIntermediateTextures[i] = TextureManager::Create(nullptr, spec, name);
 				}
 				else
 				{
@@ -412,13 +416,14 @@ namespace Ball
 			m_ModelManager->ProcessModelLoadingQueue(*m_ResourceHeap);
 
 			// Hacky fix to rest the GPU buffers for ReSTIR whenever we change level
-			delete m_Reservoirs;
-			delete m_PrevReservoirs;
+			BufferManager::Destroy(m_Reservoirs);
+			BufferManager::Destroy(m_PrevReservoirs);
+
 			BufferFlags defaultUAV = (BufferFlags::UAV | BufferFlags::ALLOW_UA | BufferFlags::DEFAULT_HEAP);
 			const auto numPrimaryRays = windowWidth * windowHeight;
-			m_Reservoirs = new Buffer(
+			m_Reservoirs = BufferManager::Create(
 				nullptr, sizeof(Reservoir), numPrimaryRays, (defaultUAV | BufferFlags::SCREENSIZE), "ReSTIR Reservoir");
-			m_PrevReservoirs = new Buffer(
+			m_PrevReservoirs = BufferManager::Create(
 				nullptr, sizeof(Reservoir), numPrimaryRays, (defaultUAV | BufferFlags::SCREENSIZE), "ReSTIR Reservoir");
 		}
 
@@ -728,37 +733,14 @@ namespace Ball
 		delete m_SamplerHeap;
 		delete m_GridShaderPipeline;
 		delete m_SimpleRayTracer;
-		delete m_OutputTexture;
-		delete m_SkyTexture;
 		delete m_Denoiser;
-		delete m_TransferToRTTexture;
 
-		for (auto& m_RenderTarget : m_RenderTargets)
-			delete m_RenderTarget;
-
-		for (auto& rb : m_RayBatch)
-			delete rb;
-
-		for (auto& bloomTex : m_BloomIntermediateTextures)
-			delete bloomTex;
-
-		for (auto& noiseTex : m_BlueNoiseTextures)
-			delete noiseTex;
+		BufferManager::DestroyAll();
+		TextureManager::DestroyAll();
 
 		delete m_BloomDownsamplePipeline;
 		delete m_BloomUpsamplePipeline;
 
-		delete m_GpuModelInfo;
-		delete m_RayExtendBatch;
-		delete m_ShadowRayBatch;
-		delete m_NewRaysAtomic;
-		delete m_ShadowRaysAtomic;
-		delete m_RayCount;
-		delete m_WavefrontOutput;
-		delete m_Reservoirs;
-		delete m_PrevReservoirs;
-		delete m_MaterialHitData;
-		delete m_InstanceIDs;
 		delete m_GenerateRaysPipeline;
 		delete m_ExtendRaysPipeline;
 		delete m_ShadeRaysPipeline;
@@ -772,6 +754,7 @@ namespace Ball
 		delete m_TonemappingPipeline;
 		delete m_OutlineObjectsPipeline;
 		delete m_PreviousCamera;
+
 		g_LineDrawer->Shutdown();
 		delete g_LineDrawer;
 
@@ -841,6 +824,7 @@ namespace Ball
 		auto it = std::find_if(m_ScreensizeBuffers.begin(),
 							   m_ScreensizeBuffers.end(),
 							   [buffer](const ScreensizeBufferPtr& sBuffer) { return sBuffer.m_Buffer == buffer; });
+
 		if (it != m_ScreensizeBuffers.end())
 		{
 			m_ScreensizeBuffers.erase(it);
@@ -983,14 +967,14 @@ namespace Ball
 	{
 		if (!m_UpdateNewSkyboxPath.empty())
 		{
-			delete m_SkyTexture;
+			TextureManager::Destroy(m_SkyTexture);
 
 			TextureSpec skyboxSpec;
 			skyboxSpec.m_Format = TextureFormat::R32_G32_B32_A32_FLOAT;
 			skyboxSpec.m_Type = TextureType::R_TEXTURE;
 			skyboxSpec.m_Flags = TextureFlags::NONE;
 
-			m_SkyTexture = new Texture(m_UpdateNewSkyboxPath, skyboxSpec, "Skybox");
+			m_SkyTexture = TextureManager::CreateFromFilepath(m_UpdateNewSkyboxPath, skyboxSpec, "Skybox");
 			m_UpdateNewSkyboxPath.clear();
 		}
 
@@ -1027,7 +1011,8 @@ namespace Ball
 		for (int i = 0; i < NUM_BLUENOISE; i++)
 		{
 			std::string path = std::string("Images/BlueNoise/product_" + std::to_string(i) + ".png");
-			m_BlueNoiseTextures[i] = new Texture(path, blueNoiseSpec, std::string("BlueNoise_" + std::to_string(i)));
+			m_BlueNoiseTextures[i] =
+				TextureManager::CreateFromFilepath(path, blueNoiseSpec, std::string("BlueNoise_" + std::to_string(i)));
 		}
 	}
 

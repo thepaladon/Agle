@@ -6,6 +6,8 @@
 
 namespace Ball
 {
+	class TextureManager;
+
 	enum class TextureFormat
 	{
 		R8G8B8A8_UNORM,
@@ -55,21 +57,11 @@ namespace Ball
 	class Texture
 	{
 	public:
-		Texture() = default;
-
-		// Constructs a texture from raw data
-		Texture(const void* data, TextureSpec spec, const std::string& name = "default_name");
-
-		// Constructs a texture from a provided path
-		Texture(const std::string& path, TextureSpec spec, const std::string& name = "default_name");
-
-		// Todo Texture GPU Deallocation (PS5)
-		~Texture();
-
 		// Only works for RenderTarget - Windows
 		// Workaround for `ResizeFrameBuffers`
 		// ToDo : For PS5 (all) and Windows (R and RW Tex).
 		void Resize(int newWidth, int newHeight);
+
 		void UpdateData(const void* data);
 
 		// Requests Texture data to be transferred to CPU
@@ -90,7 +82,6 @@ namespace Ball
 		TextureType GetType() const { return m_Spec.m_Type; }
 		uint32_t GetBytesPerChannel() const { return m_BytesPerChannel; }
 		uint32_t GetNumChannels() const { return m_Channels; }
-
 		uint32_t GetWidth() const { return m_Spec.m_Width; }
 		uint32_t GetHeight() const { return m_Spec.m_Height; }
 
@@ -108,17 +99,21 @@ namespace Ball
 			return uint32_t(fmax(1.0, log2(fmax(float(m_Spec.m_Width), float(m_Spec.m_Height))) + 1.f));
 		}
 
+		// Note: Should be private, but because of MT Model Loading it's not - [ Angel 16/08/24 ]
 		void GenerateMips();
 
 	private:
+		friend TextureManager;
+		Texture() = default;
+		Texture(const void* data, TextureSpec spec, const std::string& name = "default_name");
+		~Texture();
+
 		uint32_t GetAlignedSize() const
 		{
 			const uint32_t rowPitch = m_Spec.m_Width * m_Channels * m_BytesPerChannel;
 			const uint32_t alignedRowPitch = Utilities::AlignToClosestUpper(rowPitch, 256);
 			return alignedRowPitch * m_Spec.m_Height;
 		}
-
-		void LoadTextureData(const void* data, const std::string& name);
 
 		TextureSpec m_Spec;
 		GPUTextureHandle m_TextureHandle = {};

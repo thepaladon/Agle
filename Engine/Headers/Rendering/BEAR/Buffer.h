@@ -4,6 +4,8 @@
 
 namespace Ball
 {
+	class BufferManager;
+
 	enum class BufferFlags
 	{
 		NONE = 0,
@@ -33,15 +35,6 @@ namespace Ball
 	class Buffer
 	{
 	public:
-		Buffer() = delete;
-
-		// Constructing a Buffer from CPU Data
-		Buffer(const void* data, const uint32_t stride, const uint32_t count, BufferFlags flags = BufferFlags::NONE,
-			   const std::string& name = "default_name");
-
-		// ToDo: GPU deallocator
-		~Buffer();
-
 		uint32_t GetNumElements() const { return m_Count; }
 		uint32_t GetStride() const { return m_Stride; } // in Bytes
 		uint32_t GetSizeBytes() const { return m_Count * m_Stride; } // in Bytes
@@ -52,6 +45,15 @@ namespace Ball
 		void Resize(uint32_t newCount);
 
 	private:
+		// Use BufferManager for BufferCreation and deletion
+		friend BufferManager;
+		Buffer() = delete;
+
+		Buffer(const void* data, const uint32_t stride, const uint32_t count, BufferFlags flags = BufferFlags::NONE,
+			   const std::string& name = "default_name");
+
+		~Buffer();
+
 		GPUBufferHandle m_BufferHandle;
 		std::string m_Name = "DEFAULT_NAME_FOR_BUFFER";
 		uint32_t m_Stride = 0;

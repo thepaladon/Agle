@@ -24,6 +24,9 @@
 
 #include <mutex>
 
+#include "Rendering/BufferManager.h"
+#include "Rendering/TextureManager.h"
+
 namespace Ball
 {
 	std::mutex modelMu;
@@ -149,7 +152,7 @@ namespace Ball
 
 			{
 				std::lock_guard<std::mutex> lg(modelMu);
-				texture = new Texture(&image.image.at(0), spec, name);
+				texture = TextureManager::Create(&image.image.at(0), spec, name);
 			}
 		}
 		else // This is in case of .gltf files which store textures as separate .jpgs/.pngs
@@ -165,7 +168,7 @@ namespace Ball
 
 			if (data)
 			{
-				texture = new Texture(data, spec, name);
+				texture = TextureManager::Create(data, spec, name);
 				stbi_image_free(data);
 			}
 			else
@@ -213,7 +216,7 @@ namespace Ball
 			dataLocation = (void*)u32_from_u16.data();
 
 			const size_t stride = sizeof(uint32_t) * numElementsInType;
-			return new Buffer(dataLocation, stride, acc.count, flags, name);
+			return BufferManager::Create(dataLocation, stride, acc.count, flags, name);
 		}
 
 		if (acc.componentType == TINYGLTF_COMPONENT_TYPE_BYTE ||
@@ -224,11 +227,11 @@ namespace Ball
 			dataLocation = (void*)u32_from_u8.data();
 
 			const size_t stride = sizeof(uint32_t) * numElementsInType;
-			return new Buffer(dataLocation, stride, acc.count, flags, name);
+			return BufferManager::Create(dataLocation, stride, acc.count, flags, name);
 		}
 
 		const size_t stride = componentSizeInBytes * numElementsInType;
-		return new Buffer(dataLocation, stride, acc.count, flags, name);
+		return BufferManager::Create(dataLocation, stride, acc.count, flags, name);
 	}
 
 	void Model::CreateBlasConstructionData(tinygltf::Model& test, OutBlasConstructor& outBlasConstrData,
@@ -320,11 +323,11 @@ namespace Ball
 		// Upload Material Buffer to GPU
 		{
 			std::lock_guard<std::mutex> lg(modelMu);
-			m_GPUMaterialBuffer = new Buffer(m_Materials.data(),
-											 sizeof(Material),
-											 m_Materials.size(),
-											 BufferFlags::SRV | BufferFlags::DEFAULT_HEAP,
-											 "Material Buffer: " + GetPath());
+			m_GPUMaterialBuffer = BufferManager::Create(m_Materials.data(),
+														sizeof(Material),
+														m_Materials.size(),
+														BufferFlags::SRV | BufferFlags::DEFAULT_HEAP,
+														"Material Buffer: " + GetPath());
 		}
 
 		// Load Buffers (Accessors) to GPU
@@ -417,11 +420,11 @@ namespace Ball
 		// CreateLightTriangleArray(blasHelperData, rootNodeIdx, model, *m_OutBlasConstrData);
 
 		BufferFlags primFlag = m_HasAnimation ? BufferFlags::UPLOAD_HEAP : BufferFlags::DEFAULT_HEAP;
-		m_GPUPrimitiveBuffer = new Buffer(m_OutBlasConstrData->m_PrimitiveBufferGPU.data(),
-										  sizeof(PrimitiveGPU),
-										  m_OutBlasConstrData->m_PrimitiveBufferGPU.size(),
-										  BufferFlags::SRV | primFlag,
-										  "Primitive Buffer: " + GetPath());
+		m_GPUPrimitiveBuffer = BufferManager::Create(m_OutBlasConstrData->m_PrimitiveBufferGPU.data(),
+													 sizeof(PrimitiveGPU),
+													 m_OutBlasConstrData->m_PrimitiveBufferGPU.size(),
+													 BufferFlags::SRV | primFlag,
+													 "Primitive Buffer: " + GetPath());
 
 		m_CpuPhysicsData.m_PrimitiveBufferGPU = &m_OutBlasConstrData->m_PrimitiveBufferGPU;
 		GetCPUTrianglePrimitives(model, blasHelperData.m_Meshes);
@@ -443,12 +446,12 @@ namespace Ball
 	void Model::Unload()
 	{
 		for (int i = 0; i < m_Buffers.size(); i++)
-			delete m_Buffers[i];
+			BufferManager::Destroy(m_Buffers[i]);
 		for (int i = 0; i < m_Textures.size(); i++)
-			delete m_Textures[i];
+			TextureManager::Destroy(m_Textures[i]);
 
-		delete m_GPUMaterialBuffer;
-		delete m_GPUPrimitiveBuffer;
+		BufferManager::Destroy(m_GPUMaterialBuffer);
+		BufferManager::Destroy(m_GPUPrimitiveBuffer);
 		delete m_OutBlasConstrData;
 		delete m_Animation;
 

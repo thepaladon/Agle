@@ -15,7 +15,8 @@ Input::Input()
 Input::~Input()
 {
 	// Before we shutdown, stop all vibration
-	SetControllerVibration(controllerMotor::MOTORBOTH, 0);
+	if (IsControllerConnected())
+		SetControllerVibration(controllerMotor::MOTORBOTH, 0);
 
 	INFO(LOG_INPUT, "Input system got destroyed...");
 }
