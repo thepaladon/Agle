@@ -1,13 +1,12 @@
 #pragma once
-#include <memory>
-#include <set>
 
 #include "BEAR/Buffer.h"
 
 namespace Ball
 {
+	class CommandList;
 	class BufferVisualizer;
-}
+} // namespace Ball
 
 namespace Ball
 {
@@ -22,10 +21,15 @@ namespace Ball
 
 		static size_t GetCount() { return m_BufferCount; }
 
+		// For Cleaning GPU Upload Buffers once they've completed their job
+		static void CleanupHelperResources();
+
 	private:
 		BufferManager() = delete;
 		BufferManager(const BufferManager&) = delete;
 		BufferManager& operator=(const BufferManager&) = delete;
+
+		;
 
 		friend BufferVisualizer; // Uses this data to display info about Buffers
 		static inline std::list<Buffer*> m_Buffers;

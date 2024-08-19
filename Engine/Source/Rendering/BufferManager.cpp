@@ -27,4 +27,15 @@ namespace Ball
 
 		m_Buffers.clear();
 	}
+
+	void BufferManager::CleanupHelperResources()
+	{
+		// HACK : DirectX 12 specific
+		for (const auto& buf : m_Buffers)
+		{
+			if (buf->GetGPUHandleRef().m_Uploader.Get() != nullptr)
+				buf->GetGPUHandleRef().m_Uploader.Reset();
+		}
+	}
+
 } // namespace Ball

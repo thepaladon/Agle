@@ -48,6 +48,7 @@ namespace Ball
 			// Fill in data
 			if ((m_Flags & BufferFlags::DEFAULT_HEAP) != BufferFlags::NONE)
 			{
+				// Note: this might be unnecessary
 				if (m_BufferHandle.m_Uploader.Get() != nullptr)
 					m_BufferHandle.m_Uploader.Get()->Release();
 

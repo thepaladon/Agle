@@ -369,6 +369,7 @@ namespace Ball
 		// Wait for Previous frame to Complete
 		m_BackEndAPI->WaitForCmdQueueExecute();
 		m_BackEndAPI->BeginFrame();
+		BufferManager::CleanupHelperResources();
 	}
 
 	void RenderAPI::Render()
