@@ -48,11 +48,11 @@ namespace Ball
 		// Use BufferManager for BufferCreation and deletion
 		friend BufferManager;
 		Buffer() = delete;
-
 		Buffer(const void* data, const uint32_t stride, const uint32_t count, BufferFlags flags = BufferFlags::NONE,
 			   const std::string& name = "default_name");
-
 		~Buffer();
+
+		void CleanupHelperResources();
 
 		GPUBufferHandle m_BufferHandle;
 		std::string m_Name = "DEFAULT_NAME_FOR_BUFFER";
