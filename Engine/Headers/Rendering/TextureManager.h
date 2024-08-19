@@ -24,6 +24,9 @@ namespace Ball
 		// Function to get TextureType as string
 		static std::string GetTypeAsString(const TextureType type);
 
+		// HACK : Move this out of here
+		static void CleanupHelperResources();
+
 	private:
 		TextureManager() = delete;
 		TextureManager(const TextureManager&) = delete;

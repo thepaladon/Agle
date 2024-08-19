@@ -31,7 +31,8 @@ namespace Ball
 		const std::string randomFile = hdrFiles[distr(gen)];
 		const std::string finalfile = path + randomFile;
 
-		Ball::GetEngine().GetRenderer().LoadSkybox(finalfile);
+		// DON'T COMMIT THIS (only for testing)
+		// Ball::GetEngine().GetRenderer().LoadSkybox(finalfile);
 	}
 
 	Level::~Level()
