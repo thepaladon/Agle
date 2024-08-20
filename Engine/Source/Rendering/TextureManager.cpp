@@ -95,7 +95,6 @@ std::string TextureManager::GetTypeAsString(const TextureType type)
 
 void TextureManager::CleanupHelperResources()
 {
-	// HACK : DirectX 12 specific
 	for (const auto& tex : m_Textures)
 		tex->CleanupHelperResources();
 }

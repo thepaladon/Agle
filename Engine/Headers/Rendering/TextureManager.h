@@ -24,7 +24,7 @@ namespace Ball
 		// Function to get TextureType as string
 		static std::string GetTypeAsString(const TextureType type);
 
-		// HACK : Move this out of here
+		// For Cleaning GPU Upload Buffers once they've completed their job
 		static void CleanupHelperResources();
 
 	private:
