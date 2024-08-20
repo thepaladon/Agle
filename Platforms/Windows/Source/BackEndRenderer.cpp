@@ -25,6 +25,9 @@
 #include <ImGui/imgui_impl_dx12.h>
 #include <stb/stb_image.h>
 
+#include "Rendering/BufferManager.h"
+#include "Rendering/TextureManager.h"
+
 #pragma clang diagnostic pop
 
 // Load DX12 Agility. This is required for devices that don't support Shader model 6.6 and other DX12 Ultimate features
@@ -280,6 +283,9 @@ namespace Ball
 			GlobalDX12::g_FrameIndex * GlobalDX12::g_RTVDescSize;
 
 		GlobalDX12::g_DirectCommandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+
+		BufferManager::CleanupHelperResources();
+		TextureManager::CleanupHelperResources();
 	}
 
 	void BackEndRenderer::PresentFrame()

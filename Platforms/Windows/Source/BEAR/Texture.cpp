@@ -53,6 +53,8 @@ namespace Ball
 		const uint32_t alignedRowPitch = Utilities::AlignToClosestUpper(rowPitch, 256);
 		m_SizeInBytes = rowPitch * m_Spec.m_Height;
 		const uint32_t alignedSize = alignedRowPitch * m_Spec.m_Height;
+
+		ASSERT_MSG(LOG_GRAPHICS, m_TextureHandle.m_Uploader == nullptr, "Texture must be null to create a new one");
 		m_TextureHandle.m_Uploader = Helpers::CreateBuffer(
 			alignedSize, D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_GENERIC_READ, Helpers::kUploadHeapProps);
 
@@ -101,6 +103,7 @@ namespace Ball
 			// Fill in data
 			CD3DX12_RANGE readRange(0, 0);
 			UINT8* pUploadBegin;
+			ASSERT_MSG(LOG_GRAPHICS, m_TextureHandle.m_Uploader != nullptr, "Texture must be valid to update its data");
 			ThrowIfFailed(m_TextureHandle.m_Uploader->Map(0, &readRange, reinterpret_cast<void**>(&pUploadBegin)));
 
 			const uint32_t alignedSize = GetAlignedSize();
@@ -200,8 +203,8 @@ namespace Ball
 
 	void Texture::Resize(int newWidth, int newHeight)
 	{
+		CleanupHelperResources();
 		m_TextureHandle.m_Texture.Reset();
-		m_TextureHandle.m_Uploader.Reset();
 		m_Spec.m_Width = newWidth;
 		m_Spec.m_Height = newHeight;
 		const uint32_t rowPitch = m_Spec.m_Width * m_Channels * m_BytesPerChannel;
@@ -223,6 +226,7 @@ namespace Ball
 			// Allocates memory
 			m_TextureHandle.m_Texture = Helpers::CreateTextureBuffer(
 				m_Spec.m_Width, m_Spec.m_Height, 1, createFormat, createFlags, m_TextureHandle.m_State, heapProps);
+			ASSERT_MSG(LOG_GRAPHICS, m_TextureHandle.m_Uploader == nullptr, "Texture must be null to create a new one");
 			m_TextureHandle.m_Uploader = Helpers::CreateBuffer(GetAlignedSize(),
 															   D3D12_RESOURCE_FLAG_NONE,
 															   D3D12_RESOURCE_STATE_GENERIC_READ,
@@ -438,7 +442,15 @@ namespace Ball
 			GetEngine().GetRenderer().RemoveScreensize(this);
 		}
 
+		CleanupHelperResources();
 		m_TextureHandle.m_Texture.ReleaseAndGetAddressOf();
-		m_TextureHandle.m_Uploader.ReleaseAndGetAddressOf();
+	}
+
+	void Texture::CleanupHelperResources()
+	{
+		// Only this should be responsible for cleaning up the uploader
+		// and (eventually) readback buffers.
+		if (m_TextureHandle.m_Uploader.Get() != nullptr)
+			m_TextureHandle.m_Uploader.Reset();
 	}
 } // namespace Ball

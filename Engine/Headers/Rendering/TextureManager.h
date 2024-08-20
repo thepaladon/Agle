@@ -5,6 +5,11 @@
 namespace Ball
 {
 	class TextureVisualizer;
+	class BackEndRenderer;
+} // namespace Ball
+
+namespace Ball
+{
 	class TextureManager
 	{
 	public:
@@ -28,6 +33,10 @@ namespace Ball
 		TextureManager() = delete;
 		TextureManager(const TextureManager&) = delete;
 		TextureManager& operator=(const TextureManager&) = delete;
+
+		// For Cleaning GPU Upload Buffers once they've completed their job
+		friend BackEndRenderer; // DirectX Specific (only this API is used rn)
+		static void CleanupHelperResources();
 
 		friend TextureVisualizer; // Uses this data to display info about Textures
 		static inline std::list<Texture*> m_Textures;

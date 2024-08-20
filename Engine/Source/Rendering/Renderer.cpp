@@ -981,7 +981,14 @@ namespace Ball
 		// Make sure we have a skybox texture loaded if we have none done so before
 		if (m_SkyTexture == nullptr)
 		{
-			LoadSkybox(LaunchParameters::GetString("Skybox", "Images/HDRIs/space4.hdr"));
+			// Kinda dumb but should work...
+			LoadSkybox(LaunchParameters::GetString("Skybox", "Images/HDRIs/green_aurora.hdr"));
+			TextureSpec skyboxSpec;
+			skyboxSpec.m_Format = TextureFormat::R32_G32_B32_A32_FLOAT;
+			skyboxSpec.m_Type = TextureType::R_TEXTURE;
+			skyboxSpec.m_Flags = TextureFlags::NONE;
+
+			m_SkyTexture = TextureManager::CreateFromFilepath(m_UpdateNewSkyboxPath, skyboxSpec, "Skybox");
 		}
 	}
 
@@ -1021,7 +1028,7 @@ namespace Ball
 		TonemapParameters tm;
 
 		tm.m_TonemapMethod = TM_LINEAR;
-		tm.m_Exposure = 0.2f;
+		tm.m_Exposure = 0.8f;
 		tm.m_Gamma = 1.9f;
 		tm.m_MaxLuminance = 1.0f;
 		tm.m_ReinhardConstant = 1.0f;

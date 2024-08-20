@@ -27,4 +27,11 @@ namespace Ball
 
 		m_Buffers.clear();
 	}
+
+	void BufferManager::CleanupHelperResources()
+	{
+		for (const auto& buf : m_Buffers)
+			buf->CleanupHelperResources();
+	}
+
 } // namespace Ball

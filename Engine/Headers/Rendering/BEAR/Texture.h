@@ -108,6 +108,8 @@ namespace Ball
 		Texture(const void* data, TextureSpec spec, const std::string& name = "default_name");
 		~Texture();
 
+		void CleanupHelperResources();
+
 		uint32_t GetAlignedSize() const
 		{
 			const uint32_t rowPitch = m_Spec.m_Width * m_Channels * m_BytesPerChannel;

@@ -25,12 +25,20 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace Ball
 {
+	// Used for when going Fullscreen -> Windowed.
+	static WINDOWPLACEMENT g_windowBeforeFullscreen = {
+		sizeof(WINDOWPLACEMENT), // length of the structure
+		0, // flags (no specific flags in this case)
+		SW_SHOWNORMAL, // showCmd (normal window)
+		{-1, -1}, // ptMinPosition (default minimized position)
+		{-1, -1}, // ptMaxPosition (default maximized position)
+		// The RECT is set in the Constructor
+	};
+
 	Window::Window(uint32_t width, uint32_t height, const std::string& name)
 	{
 		// Initialize the window class.
 
-		m_WindowData.m_Width = width;
-		m_WindowData.m_Height = height;
 		m_WindowData.m_Alive = true;
 		m_WindowData.m_Name = name;
 
@@ -62,18 +70,44 @@ namespace Ball
 		wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 
 		RECT rect;
-		rect.left = 0;
-		rect.top = 0;
-		rect.right = m_WindowData.m_Width;
-		rect.bottom = m_WindowData.m_Height;
+		auto offset = 50;
+		rect.left = offset;
+		rect.top = offset;
+		rect.right = width + offset;
+		rect.bottom = height + offset;
+
+		g_windowBeforeFullscreen.rcNormalPosition = rect;
 
 		// Adjust the window size based on the desired client area size
 		AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
 
+#ifdef SHIPPING
+		static bool firstFrameFullScreen = true;
+#else
+		auto fullscreenLP = LaunchParameters::Contains("Fullscreen");
+		static bool firstFrameFullScreen = fullscreenLP;
+#endif
+
+		auto dwStyle = WS_OVERLAPPEDWINDOW;
+
+		if (firstFrameFullScreen)
+		{
+			// Assuming you have determined the monitor's dimensions:
+			HMONITOR hMonitor = MonitorFromWindow(NULL, MONITOR_DEFAULTTONEAREST);
+			MONITORINFO mi = {sizeof(MONITORINFO)};
+			GetMonitorInfo(hMonitor, &mi);
+
+			dwStyle = WS_POPUP;
+			rect.left = mi.rcMonitor.left; // X position (top-left corner of the monitor)
+			rect.top = mi.rcMonitor.top; // Y position (top-left corner of the monitor)
+			rect.right = mi.rcMonitor.right; // Width (full monitor width)
+			rect.bottom = mi.rcMonitor.bottom; // Height (full monitor height)
+		}
+
 		RegisterClassEx(&wc);
 		HWND hwnd = CreateWindow(wc.lpszClassName,
 								 lName,
-								 WS_OVERLAPPEDWINDOW,
+								 dwStyle,
 								 CW_USEDEFAULT,
 								 CW_USEDEFAULT,
 								 rect.right - rect.left,
@@ -85,6 +119,11 @@ namespace Ball
 
 		UpdateWindow(hwnd);
 		m_WindowHandle = hwnd;
+
+		RECT finalRenderableRect;
+		GetClientRect(hwnd, &finalRenderableRect);
+		m_WindowData.m_Width = finalRenderableRect.right - finalRenderableRect.left;
+		m_WindowData.m_Height = finalRenderableRect.bottom - finalRenderableRect.top;
 	}
 
 	void Window::Init()
@@ -114,17 +153,9 @@ namespace Ball
 		const auto kEnterPrssed = GetInput().GetRawKeyState(KEY_ENTER) == KeyState::PRESSED;
 		const auto kAltDown = GetInput().GetRawKeyState(KEY_ALT) == KeyState::DOWN;
 
-#ifdef SHIPPING
-		static bool firstFrameFullScreen = true;
-#else
-		auto fullscreenLP = LaunchParameters::Contains("Fullscreen");
-		static bool firstFrameFullScreen = fullscreenLP;
-#endif
-
-		if ((kEnterPrssed && kAltDown) || firstFrameFullScreen)
+		if ((kEnterPrssed && kAltDown))
 		{
 			ToggleFullscreen();
-			firstFrameFullScreen = false;
 		}
 	}
 
@@ -140,14 +171,12 @@ namespace Ball
 
 	void Window::ToggleFullscreen()
 	{
-		static WINDOWPLACEMENT previousPlacement = {sizeof(previousPlacement)};
-
 		auto hwnd = (HWND)m_WindowHandle;
 		DWORD style = GetWindowLongPtr(hwnd, GWL_STYLE);
 		if (style & WS_OVERLAPPEDWINDOW)
 		{
 			MONITORINFO mi = {sizeof(mi)};
-			if (GetWindowPlacement(hwnd, &previousPlacement) &&
+			if (GetWindowPlacement(hwnd, &g_windowBeforeFullscreen) &&
 				GetMonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY), &mi))
 			{
 				SetWindowLongPtr(hwnd, GWL_STYLE, style & ~WS_OVERLAPPEDWINDOW);
@@ -167,12 +196,15 @@ namespace Ball
 		else
 		{
 			SetWindowLongPtr(hwnd, GWL_STYLE, style | WS_OVERLAPPEDWINDOW);
-			SetWindowPlacement(hwnd, &previousPlacement);
+			SetWindowPlacement(hwnd, &g_windowBeforeFullscreen);
 			SetWindowPos(
 				hwnd, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 
-			m_WindowData.m_Width = previousPlacement.rcNormalPosition.right - previousPlacement.rcNormalPosition.left;
-			m_WindowData.m_Height = previousPlacement.rcNormalPosition.bottom - previousPlacement.rcNormalPosition.top;
+			RECT rect;
+			GetClientRect(hwnd, &rect);
+
+			m_WindowData.m_Width = rect.right - rect.left;
+			m_WindowData.m_Height = rect.bottom - rect.top;
 			Ball::GetWindow().Resize(m_WindowData.m_Width, m_WindowData.m_Height);
 		}
 	}

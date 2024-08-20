@@ -92,3 +92,9 @@ std::string TextureManager::GetTypeAsString(const TextureType type)
 		return "Unknown Type";
 	}
 }
+
+void TextureManager::CleanupHelperResources()
+{
+	for (const auto& tex : m_Textures)
+		tex->CleanupHelperResources();
+}

@@ -48,11 +48,10 @@ namespace Ball
 			// Fill in data
 			if ((m_Flags & BufferFlags::DEFAULT_HEAP) != BufferFlags::NONE)
 			{
-				if (m_BufferHandle.m_Uploader.Get() != nullptr)
-					m_BufferHandle.m_Uploader.Get()->Release();
-
 				// For default heap we need to use a staging resource as we can't write straight to it
 				CD3DX12_RANGE readRange(0, 0);
+				ASSERT_MSG(
+					LOG_GRAPHICS, m_BufferHandle.m_Uploader == nullptr, "Buffer must be null to create a new one");
 				m_BufferHandle.m_Uploader = Helpers::CreateBuffer(
 					bufferSize, D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_GENERIC_READ, Helpers::kUploadHeapProps);
 
@@ -103,9 +102,6 @@ namespace Ball
 	{
 		m_BufferHandle.m_Buffer.Reset();
 
-		if (m_BufferHandle.m_Uploader.Get() != nullptr)
-			m_BufferHandle.m_Uploader.Reset();
-
 		m_Count = newCount;
 		uint32_t bufferSize = m_Stride * m_Count;
 
@@ -131,6 +127,7 @@ namespace Ball
 
 		if ((m_Flags & BufferFlags::DEFAULT_HEAP) != BufferFlags::NONE)
 		{
+			ASSERT_MSG(LOG_GRAPHICS, m_BufferHandle.m_Uploader == nullptr, "Buffer must be null to create a new one");
 			m_BufferHandle.m_Uploader = Helpers::CreateBuffer(
 				bufferSize, D3D12_RESOURCE_FLAG_NONE, D3D12_RESOURCE_STATE_GENERIC_READ, Helpers::kUploadHeapProps);
 		}
@@ -143,8 +140,15 @@ namespace Ball
 			GetEngine().GetRenderer().RemoveScreensize(this);
 		}
 
+		CleanupHelperResources();
 		m_BufferHandle.m_Buffer.ReleaseAndGetAddressOf();
-		m_BufferHandle.m_Uploader.ReleaseAndGetAddressOf();
 	}
 
+	void Buffer::CleanupHelperResources()
+	{
+		// Only this should be responsible for cleaning up the uploader
+		// and (eventually) readback buffers.
+		if (m_BufferHandle.m_Uploader.Get() != nullptr)
+			m_BufferHandle.m_Uploader.Reset();
+	}
 } // namespace Ball
