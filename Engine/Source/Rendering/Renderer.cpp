@@ -369,9 +369,6 @@ namespace Ball
 		// Wait for Previous frame to Complete
 		m_BackEndAPI->WaitForCmdQueueExecute();
 		m_BackEndAPI->BeginFrame();
-
-		BufferManager::CleanupHelperResources();
-		TextureManager::CleanupHelperResources();
 	}
 
 	void RenderAPI::Render()
@@ -1031,7 +1028,7 @@ namespace Ball
 		TonemapParameters tm;
 
 		tm.m_TonemapMethod = TM_LINEAR;
-		tm.m_Exposure = 0.2f;
+		tm.m_Exposure = 0.8f;
 		tm.m_Gamma = 1.9f;
 		tm.m_MaxLuminance = 1.0f;
 		tm.m_ReinhardConstant = 1.0f;

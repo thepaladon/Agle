@@ -5,6 +5,8 @@
 namespace Ball
 {
 	class BufferVisualizer;
+	class BackEndRenderer;
+
 } // namespace Ball
 
 namespace Ball
@@ -20,13 +22,14 @@ namespace Ball
 
 		static size_t GetCount() { return m_BufferCount; }
 
-		// For Cleaning GPU Upload Buffers once they've completed their job
-		static void CleanupHelperResources();
-
 	private:
 		BufferManager() = delete;
 		BufferManager(const BufferManager&) = delete;
 		BufferManager& operator=(const BufferManager&) = delete;
+
+		// For Cleaning GPU Upload Buffers once they've completed their job
+		friend BackEndRenderer; // DirectX Specific (only this API is used rn)
+		static void CleanupHelperResources();
 
 		friend BufferVisualizer; // Uses this data to display info about Buffers
 		static inline std::list<Buffer*> m_Buffers;
